@@ -19,9 +19,9 @@ PlasmoidItem {
     P5Support.DataSource {
         id: stateReader
         engine: "executable"
-        connectedSources: []
+        connectedSources: ["cat /home/john/.claude/usage-bar-state.json"]
+        interval: 30000
         onNewData: function(source, data) {
-            disconnectSource(source);
             var stdout = data["stdout"] || "";
             try {
                 var d = JSON.parse(stdout);
@@ -33,12 +33,13 @@ PlasmoidItem {
             } catch (e) {
                 root.loadError = true;
             }
-            donutCanvas.requestPaint();
+            starCanvas.requestPaint();
         }
     }
 
     function loadData() {
-        stateReader.connectSource("cat $HOME/.claude/usage-bar-state.json");
+        stateReader.connectedSources = [];
+        stateReader.connectedSources = ["cat /home/john/.claude/usage-bar-state.json"];
     }
 
     function arcColour(frac) {

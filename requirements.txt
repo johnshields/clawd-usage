@@ -1,2 +1,1 @@
-pycairo
-PyGObject
+# stdlib only — no third-party deps
