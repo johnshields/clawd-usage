@@ -11,7 +11,7 @@ Requires Claude Code logged in (`~/.claude/.credentials.json` exists).
 ## Install
 
 ```sh
-git clone https://github.com/scott-lewis1/claude-usage-bar ~/Projects/claude-donut  # or your fork
+git clone https://github.com/johnshields/claude-donut ~/Projects/claude-donut
 cd ~/Projects/claude-donut
 kpackagetool6 --type Plasma/Applet --install plasmoid
 ```
@@ -57,9 +57,3 @@ src/oauth.py                  OAuth refresh + usage API + state writer
 plasmoid/metadata.json        plasmoid manifest
 plasmoid/contents/ui/main.qml widget UI (Canvas asterisk + popup)
 ```
-
-## Credit
-
-Linux port of [scott-lewis1/claude-usage-bar](https://github.com/scott-lewis1/claude-usage-bar) (Windows). OAuth logic reused; UI rewritten as KDE plasmoid.
-
-MIT.
