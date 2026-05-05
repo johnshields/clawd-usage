@@ -16,11 +16,12 @@ PlasmoidItem {
 
     preferredRepresentation: compactRepresentation
 
+    property int tick: 0
+
     P5Support.DataSource {
         id: stateReader
         engine: "executable"
-        connectedSources: ["cat /home/john/.claude/usage-bar-state.json"]
-        interval: 30000
+        connectedSources: []
         onNewData: function(source, data) {
             var stdout = data["stdout"] || "";
             try {
@@ -34,18 +35,21 @@ PlasmoidItem {
                 root.loadError = true;
             }
             starCanvas.requestPaint();
+            disconnectSource(source);
         }
     }
 
     function loadData() {
-        stateReader.connectedSources = [];
-        stateReader.connectedSources = ["cat /home/john/.claude/usage-bar-state.json"];
+        root.tick++;
+        // Unique source string each call forces re-execution.
+        stateReader.connectSource(
+            "sh -c 'cat /home/john/.claude/usage-bar-state.json # " + root.tick + "'"
+        );
     }
 
     function arcColour(frac) {
-        if (frac < 0.5)  return "#E3713F";
-        if (frac < 0.75) return "#FF8C19";
-        return "#F23F3F";
+        if (frac < 0.75) return "#D97757";  // Claude orange
+        return "#F23F3F";                   // red warn
     }
 
     function formatResets(iso) {
@@ -57,12 +61,21 @@ PlasmoidItem {
         return "Resets in " + h + "h " + (m < 10 ? "0" : "") + m + "m";
     }
 
+    function formatAge(iso) {
+        if (!iso) return "";
+        var ageS = Math.max(0, Math.floor((new Date() - new Date(iso)) / 1000));
+        if (ageS < 60)   return "updated " + ageS + "s ago";
+        if (ageS < 3600) return "updated " + Math.floor(ageS / 60) + "m ago";
+        return "updated " + Math.floor(ageS / 3600) + "h ago";
+    }
+
     Component.onCompleted: loadData()
 
     Timer {
-        interval: 30000
+        interval: 5000
         running: true
         repeat: true
+        triggeredOnStart: true
         onTriggered: root.loadData()
     }
 
@@ -215,6 +228,14 @@ PlasmoidItem {
             visible: !root.loadError && root.resetsAt !== ""
             text: root.formatResets(root.resetsAt)
             opacity: 0.7
+        }
+
+        Label {
+            Layout.alignment: Qt.AlignHCenter
+            visible: !root.loadError && root.updatedAt !== ""
+            text: root.formatAge(root.updatedAt)
+            opacity: 0.5
+            font.pixelSize: Kirigami.Theme.smallFont.pixelSize
         }
 
         Item { Layout.fillHeight: true }

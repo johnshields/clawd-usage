@@ -5,7 +5,7 @@ import time
 
 from src.oauth import OAuthPoller
 
-POLL_INTERVAL_S = 300
+POLL_INTERVAL_S = 60
 
 logging.basicConfig(level=logging.WARNING)
 
