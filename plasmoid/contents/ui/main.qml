@@ -95,86 +95,20 @@ PlasmoidItem {
             text: "100%"
         }
 
-        Image {
-            id: silhouetteSrc
-            source: Qt.resolvedUrl("../icons/clawd-silhouette.png")
-            visible: false
-            cache: true
-            asynchronous: false
-        }
-
-        Image {
-            id: eyesSrc
-            source: Qt.resolvedUrl("../icons/clawd-eyes.png")
-            visible: false
-            cache: true
-            asynchronous: false
-        }
-
-        Canvas {
-            id: iconCanvas
+        ClawdIcon {
+            id: compactIcon
             anchors.left: parent.left
             anchors.top: parent.top
             anchors.bottom: parent.bottom
             width: iconW
-
-            function paintInside(ctx, x, y, w, h, colour) {
-                ctx.save();
-                ctx.beginPath();
-                ctx.rect(x, y, w, h);
-                ctx.clip();
-                ctx.drawImage(silhouetteSrc, 0, 0, width, height);
-                ctx.globalCompositeOperation = "source-in";
-                ctx.fillStyle = colour;
-                ctx.fillRect(0, 0, width, height);
-                ctx.restore();
-            }
-
-            onPaint: {
-                var ctx = getContext("2d");
-                ctx.reset();
-                if (silhouetteSrc.status !== Image.Ready) return;
-
-                var frac = Math.max(0, Math.min(1, root.pct / 100));
-
-                if (root.loadError) {
-                    paintInside(ctx, 0, 0, width, height, "#F23F3F");
-                } else {
-                    paintInside(ctx, 0, 0, width, height, Qt.rgba(0.6, 0.6, 0.6, 0.4));
-                    if (frac > 0) {
-                        var fillH = height * frac;
-                        paintInside(ctx, 0, height - fillH, width, fillH, root.arcColour(frac));
-                    }
-                }
-
-                // Eyes overlay (always on top)
-                if (eyesSrc.status === Image.Ready) {
-                    ctx.drawImage(eyesSrc, 0, 0, width, height);
-                }
-            }
-
-            Connections {
-                target: root
-                function onPctChanged()       { iconCanvas.requestPaint(); }
-                function onLoadErrorChanged() { iconCanvas.requestPaint(); }
-            }
-            Connections {
-                target: silhouetteSrc
-                function onStatusChanged() {
-                    if (silhouetteSrc.status === Image.Ready) iconCanvas.requestPaint();
-                }
-            }
-            Connections {
-                target: eyesSrc
-                function onStatusChanged() {
-                    if (eyesSrc.status === Image.Ready) iconCanvas.requestPaint();
-                }
-            }
+            pct: root.pct
+            loadError: root.loadError
+            fillColour: root.arcColour(root.pct / 100)
         }
 
         Label {
             id: pctLabel
-            anchors.left: iconCanvas.right
+            anchors.left: compactIcon.right
             anchors.leftMargin: 4
             anchors.verticalCenter: parent.verticalCenter
             visible: Plasmoid.configuration.showPercentLabel && !root.loadError
@@ -192,17 +126,27 @@ PlasmoidItem {
 
     fullRepresentation: ColumnLayout {
         implicitWidth:  160
-        implicitHeight: 200
+        implicitHeight: 240
         Layout.minimumWidth:  160
         Layout.maximumWidth:  220
         Layout.preferredWidth:  160
-        Layout.preferredHeight: 200
+        Layout.preferredHeight: 240
         spacing: Kirigami.Units.smallSpacing
 
         Kirigami.Heading {
             level: 3
             text: "Clawd usage"
             Layout.alignment: Qt.AlignHCenter
+        }
+
+        ClawdIcon {
+            Layout.alignment: Qt.AlignHCenter
+            Layout.topMargin: Kirigami.Units.smallSpacing
+            implicitHeight: 56
+            implicitWidth: Math.round(56 * (114 / 81))
+            pct: root.pct
+            loadError: root.loadError
+            fillColour: root.arcColour(root.pct / 100)
         }
 
         Label {
