@@ -48,8 +48,8 @@ PlasmoidItem {
     }
 
     function arcColour(frac) {
-        if (frac < 0.75) return "#D97757";  // Claude orange
-        return "#F23F3F";                   // red warn
+        if (frac < Plasmoid.configuration.warningThreshold / 100) return "#D97757";
+        return "#F23F3F";
     }
 
     function formatResets(iso) {
@@ -72,7 +72,7 @@ PlasmoidItem {
     Component.onCompleted: loadData()
 
     Timer {
-        interval: 5000
+        interval: Plasmoid.configuration.refreshInterval * 1000
         running: true
         repeat: true
         triggeredOnStart: true
@@ -81,12 +81,19 @@ PlasmoidItem {
 
     compactRepresentation: Item {
         readonly property real aspect: 114 / 81  // clawd icon natural ratio
-        readonly property int  iconH:  Kirigami.Units.iconSizes.smallMedium
-        readonly property int  iconW:  Math.round(iconH * aspect)
+        readonly property int  iconH:    Kirigami.Units.iconSizes.smallMedium
+        readonly property int  iconW:    Math.round(iconH * aspect)
+        readonly property int  labelW:   Plasmoid.configuration.showPercentLabel ? labelMetrics.width + 4 : 0
         Layout.minimumHeight:   iconH
         Layout.preferredHeight: iconH
-        Layout.minimumWidth:    iconW
-        Layout.preferredWidth:  iconW
+        Layout.minimumWidth:    iconW + labelW
+        Layout.preferredWidth:  iconW + labelW
+
+        TextMetrics {
+            id: labelMetrics
+            font: pctLabel.font
+            text: "100%"
+        }
 
         Image {
             id: silhouetteSrc
@@ -106,7 +113,10 @@ PlasmoidItem {
 
         Canvas {
             id: iconCanvas
-            anchors.fill: parent
+            anchors.left: parent.left
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            width: iconW
 
             function paintInside(ctx, x, y, w, h, colour) {
                 ctx.save();
@@ -160,6 +170,17 @@ PlasmoidItem {
                     if (eyesSrc.status === Image.Ready) iconCanvas.requestPaint();
                 }
             }
+        }
+
+        Label {
+            id: pctLabel
+            anchors.left: iconCanvas.right
+            anchors.leftMargin: 4
+            anchors.verticalCenter: parent.verticalCenter
+            visible: Plasmoid.configuration.showPercentLabel && !root.loadError
+            text: Math.round(root.pct) + "%"
+            font.bold: true
+            color: Kirigami.Theme.textColor
         }
 
         MouseArea {

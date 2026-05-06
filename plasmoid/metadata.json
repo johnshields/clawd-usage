@@ -4,7 +4,7 @@
         "Authors": [{"Name": "John Shields", "Email": "john@refulfil.com"}],
         "Category": "System Information",
         "Description": "Claude Code 5h rate limit usage indicator",
-        "Icon": "view-statistics",
+        "Icon": "clawd-logo",
         "Id": "com.john.clawdusage",
         "License": "MIT",
         "Name": "Clawd Usage",
