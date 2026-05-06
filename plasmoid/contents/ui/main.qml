@@ -80,62 +80,85 @@ PlasmoidItem {
     }
 
     compactRepresentation: Item {
-        Layout.minimumWidth:  Kirigami.Units.iconSizes.smallMedium
-        Layout.minimumHeight: Kirigami.Units.iconSizes.smallMedium
-        Layout.preferredWidth:  Kirigami.Units.iconSizes.smallMedium
-        Layout.preferredHeight: Kirigami.Units.iconSizes.smallMedium
+        readonly property real aspect: 114 / 81  // donut.png natural ratio
+        readonly property int  iconH:  Kirigami.Units.iconSizes.smallMedium
+        readonly property int  iconW:  Math.round(iconH * aspect)
+        Layout.minimumHeight:   iconH
+        Layout.preferredHeight: iconH
+        Layout.minimumWidth:    iconW
+        Layout.preferredWidth:  iconW
+
+        Image {
+            id: silhouetteSrc
+            source: Qt.resolvedUrl("../icons/donut-silhouette.png")
+            visible: false
+            cache: true
+            asynchronous: false
+        }
+
+        Image {
+            id: eyesSrc
+            source: Qt.resolvedUrl("../icons/donut-eyes.png")
+            visible: false
+            cache: true
+            asynchronous: false
+        }
 
         Canvas {
-            id: starCanvas
+            id: iconCanvas
             anchors.fill: parent
 
-            function drawStar(ctx, cx, cy, sr, colour) {
+            function paintInside(ctx, x, y, w, h, colour) {
+                ctx.save();
                 ctx.beginPath();
-                var spokes = 8;
-                for (var i = 0; i < spokes; i++) {
-                    var a = (i / spokes) * Math.PI * 2 - Math.PI / 2;
-                    var sx = cx + Math.cos(a) * sr * 0.15;
-                    var sy = cy + Math.sin(a) * sr * 0.15;
-                    var ex = cx + Math.cos(a) * sr;
-                    var ey = cy + Math.sin(a) * sr;
-                    ctx.moveTo(sx, sy);
-                    ctx.lineTo(ex, ey);
-                }
-                ctx.lineWidth   = Math.max(1.5, sr * 0.22);
-                ctx.lineCap     = "round";
-                ctx.strokeStyle = colour;
-                ctx.stroke();
+                ctx.rect(x, y, w, h);
+                ctx.clip();
+                ctx.drawImage(silhouetteSrc, 0, 0, width, height);
+                ctx.globalCompositeOperation = "source-in";
+                ctx.fillStyle = colour;
+                ctx.fillRect(0, 0, width, height);
+                ctx.restore();
             }
 
             onPaint: {
                 var ctx = getContext("2d");
                 ctx.reset();
-                var cx = width / 2;
-                var cy = height / 2;
-                var sr = Math.min(width, height) / 2 - 2;
+                if (silhouetteSrc.status !== Image.Ready) return;
+
                 var frac = Math.max(0, Math.min(1, root.pct / 100));
 
                 if (root.loadError) {
-                    drawStar(ctx, cx, cy, sr, "#F23F3F");
-                    return;
+                    paintInside(ctx, 0, 0, width, height, "#F23F3F");
+                } else {
+                    paintInside(ctx, 0, 0, width, height, Qt.rgba(0.6, 0.6, 0.6, 0.4));
+                    if (frac > 0) {
+                        var fillH = height * frac;
+                        paintInside(ctx, 0, height - fillH, width, fillH, root.arcColour(frac));
+                    }
                 }
 
-                drawStar(ctx, cx, cy, sr, Qt.rgba(0.6, 0.6, 0.6, 0.35));
+                // Eyes overlay (always on top)
+                if (eyesSrc.status === Image.Ready) {
+                    ctx.drawImage(eyesSrc, 0, 0, width, height);
+                }
+            }
 
-                if (frac > 0) {
-                    ctx.save();
-                    var fillH = height * frac;
-                    ctx.beginPath();
-                    ctx.rect(0, height - fillH, width, fillH);
-                    ctx.clip();
-                    drawStar(ctx, cx, cy, sr, root.arcColour(frac));
-                    ctx.restore();
+            Connections {
+                target: root
+                function onPctChanged()       { iconCanvas.requestPaint(); }
+                function onLoadErrorChanged() { iconCanvas.requestPaint(); }
+            }
+            Connections {
+                target: silhouetteSrc
+                function onStatusChanged() {
+                    if (silhouetteSrc.status === Image.Ready) iconCanvas.requestPaint();
                 }
             }
             Connections {
-                target: root
-                function onPctChanged() { starCanvas.requestPaint(); }
-                function onLoadErrorChanged() { starCanvas.requestPaint(); }
+                target: eyesSrc
+                function onStatusChanged() {
+                    if (eyesSrc.status === Image.Ready) iconCanvas.requestPaint();
+                }
             }
         }
 
