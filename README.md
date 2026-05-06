@@ -1,5 +1,7 @@
 # Clawd Usage
 
+![screenshot](/screenshot.png)
+
 KDE Plasma 6 widget showing Claude Code 5h rate limit usage. Claw'd mascot fills bottom-up; popup shows 5h/7d bars + reset countdown.
 
 Two parts:
