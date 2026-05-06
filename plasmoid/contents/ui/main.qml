@@ -80,7 +80,7 @@ PlasmoidItem {
     }
 
     compactRepresentation: Item {
-        readonly property real aspect: 114 / 81  // donut.png natural ratio
+        readonly property real aspect: 114 / 81  // clawd icon natural ratio
         readonly property int  iconH:  Kirigami.Units.iconSizes.smallMedium
         readonly property int  iconW:  Math.round(iconH * aspect)
         Layout.minimumHeight:   iconH
@@ -90,7 +90,7 @@ PlasmoidItem {
 
         Image {
             id: silhouetteSrc
-            source: Qt.resolvedUrl("../icons/donut-silhouette.png")
+            source: Qt.resolvedUrl("../icons/clawd-silhouette.png")
             visible: false
             cache: true
             asynchronous: false
@@ -98,7 +98,7 @@ PlasmoidItem {
 
         Image {
             id: eyesSrc
-            source: Qt.resolvedUrl("../icons/donut-eyes.png")
+            source: Qt.resolvedUrl("../icons/clawd-eyes.png")
             visible: false
             cache: true
             asynchronous: false
@@ -170,13 +170,17 @@ PlasmoidItem {
     }
 
     fullRepresentation: ColumnLayout {
-        Layout.preferredWidth:  280
+        implicitWidth:  160
+        implicitHeight: 200
+        Layout.minimumWidth:  160
+        Layout.maximumWidth:  220
+        Layout.preferredWidth:  160
         Layout.preferredHeight: 200
         spacing: Kirigami.Units.smallSpacing
 
         Kirigami.Heading {
             level: 3
-            text: "Claude usage"
+            text: "Clawd usage"
             Layout.alignment: Qt.AlignHCenter
         }
 
@@ -248,6 +252,7 @@ PlasmoidItem {
 
         Label {
             Layout.alignment: Qt.AlignHCenter
+            Layout.topMargin: Kirigami.Units.smallSpacing * 2
             visible: !root.loadError && root.resetsAt !== ""
             text: root.formatResets(root.resetsAt)
             opacity: 0.7

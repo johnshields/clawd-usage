@@ -3,13 +3,13 @@
     "KPlugin": {
         "Authors": [{"Name": "John Shields", "Email": "john@refulfil.com"}],
         "Category": "System Information",
-        "Description": "Claude Code 5h rate limit usage donut",
+        "Description": "Claude Code 5h rate limit usage indicator",
         "Icon": "view-statistics",
-        "Id": "com.john.claudedonut",
+        "Id": "com.john.clawdusage",
         "License": "MIT",
-        "Name": "Claude Donut",
+        "Name": "Clawd Usage",
         "Version": "1.0",
-        "Website": "https://github.com/scott-lewis1/claude-usage-bar"
+        "Website": "https://github.com/johnshields/clawd-usage"
     },
     "X-Plasma-API-Minimum-Version": "6.0"
 }

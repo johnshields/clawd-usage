@@ -1,36 +1,36 @@
-# Claude Donut
+# Clawd Usage
 
-KDE Plasma 6 widget showing Claude Code 5h rate limit usage. Asterisk fills bottom-up; popup shows 5h/7d bars + reset countdown.
+KDE Plasma 6 widget showing Claude Code 5h rate limit usage. Claw'd mascot fills bottom-up; popup shows 5h/7d bars + reset countdown.
 
 Two parts:
 - **Daemon** — Python (stdlib only). Refreshes OAuth token, polls `api.anthropic.com/api/oauth/usage`, writes `~/.claude/usage-bar-state.json`.
-- **Plasmoid** — QML widget. Reads state file every 5s, renders Claude asterisk.
+- **Plasmoid** — QML widget. Reads state file every 5s, renders Claw'd icon.
 
 Requires Claude Code logged in (`~/.claude/.credentials.json` exists).
 
 ## Install
 
 ```sh
-git clone https://github.com/johnshields/claude-donut ~/Projects/claude-donut
-cd ~/Projects/claude-donut
+git clone https://github.com/johnshields/clawd-usage ~/Projects/clawd-usage
+cd ~/Projects/clawd-usage
 kpackagetool6 --type Plasma/Applet --install plasmoid
 ```
 
-Add widget: right-click panel → **Add Widgets** → search **Claude Donut**.
+Add widget: right-click panel → **Add Widgets** → search **Clawd Usage**.
 
 ## Daemon (systemd)
 
 ```sh
 mkdir -p ~/.config/systemd/user
-cat > ~/.config/systemd/user/claude-donut.service << 'EOF'
+cat > ~/.config/systemd/user/clawd-usage.service << 'EOF'
 [Unit]
-Description=Claude Donut state daemon
+Description=Clawd Usage state daemon
 After=graphical-session.target
 
 [Service]
 Type=simple
 ExecStart=/usr/bin/python3 main.py
-WorkingDirectory=%h/Projects/claude-donut
+WorkingDirectory=%h/Projects/clawd-usage
 Restart=on-failure
 RestartSec=5
 
@@ -39,7 +39,7 @@ WantedBy=graphical-session.target
 EOF
 
 systemctl --user daemon-reload
-systemctl --user enable --now claude-donut.service
+systemctl --user enable --now clawd-usage.service
 ```
 
 ## Update plasmoid after edits
