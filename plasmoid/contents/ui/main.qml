@@ -234,10 +234,26 @@ PlasmoidItem {
         Item { Layout.fillHeight: true }
 
         Button {
+            id: refreshBtn
             Layout.alignment: Qt.AlignHCenter
             Layout.bottomMargin: Kirigami.Units.smallSpacing
-            text: "Refresh"
             onClicked: root.loadData()
+
+            contentItem: Kirigami.Icon {
+                source: Qt.resolvedUrl("../icons/refresh-bold.svg")
+                color: "#000000"
+                isMask: true
+                implicitWidth: 18
+                implicitHeight: 18
+            }
+            background: Rectangle {
+                radius: 4
+                color: refreshBtn.pressed ? Qt.darker("#D97757", 1.2)
+                     : refreshBtn.hovered ? Qt.lighter("#D97757", 1.1)
+                     : "#D97757"
+                implicitWidth: 38
+                implicitHeight: 30
+            }
         }
     }
 }
