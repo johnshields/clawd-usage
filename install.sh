@@ -4,35 +4,44 @@ set -euo pipefail
 
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-# Install icon to user theme so plasmoid Icon field resolves
-install -Dm644 "$PROJECT_DIR/plasmoid/contents/icons/clawd-logo.svg" \
-    "$HOME/.local/share/icons/hicolor/scalable/apps/clawd-logo.svg" 2>/dev/null || \
-    {
-        # No SVG yet — generate from PNG
-        python3 -c "
-import base64
-b = base64.b64encode(open('$PROJECT_DIR/plasmoid/contents/icons/clawd-logo.png', 'rb').read()).decode()
-import os
-os.makedirs(os.path.expanduser('~/.local/share/icons/hicolor/scalable/apps'), exist_ok=True)
-open(os.path.expanduser('~/.local/share/icons/hicolor/scalable/apps/clawd-logo.svg'), 'w').write(
-    f'<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 114 81\" width=\"114\" height=\"81\"><image x=\"0\" y=\"0\" width=\"114\" height=\"81\" xlink:href=\"data:image/png;base64,{b}\"/></svg>'
-)"
-    }
+# Preflight checks
+for cmd in python3 kpackagetool6 systemctl; do
+    command -v "$cmd" >/dev/null 2>&1 || { echo "missing: $cmd"; exit 1; }
+done
 
-# Install plasmoid
+PYTHON_BIN="$(command -v python3)"
+
+# Need ~/.claude/.credentials.json from Claude Code login
+[ -f "$HOME/.claude/.credentials.json" ] || {
+    echo "warning: $HOME/.claude/.credentials.json missing. Run 'claude login' first."
+}
+
+# Install icon to user hicolor theme
+ICON_DIR="$HOME/.local/share/icons/hicolor/scalable/apps"
+mkdir -p "$ICON_DIR"
+install -m644 "$PROJECT_DIR/plasmoid/contents/icons/clawd-logo.svg" "$ICON_DIR/clawd-logo.svg"
+
+# Refresh icon cache if tool available + theme index exists
+if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+    [ -f "$HOME/.local/share/icons/hicolor/index.theme" ] && \
+        gtk-update-icon-cache -f -t "$HOME/.local/share/icons/hicolor" 2>/dev/null || true
+fi
+
+# Install / upgrade plasmoid
 kpackagetool6 --type Plasma/Applet --install "$PROJECT_DIR/plasmoid" 2>/dev/null \
     || kpackagetool6 --type Plasma/Applet --upgrade "$PROJECT_DIR/plasmoid"
 
 # Install systemd user service
-mkdir -p ~/.config/systemd/user
-cat > ~/.config/systemd/user/clawd-usage.service << EOF
+SYSTEMD_DIR="$HOME/.config/systemd/user"
+mkdir -p "$SYSTEMD_DIR"
+cat > "$SYSTEMD_DIR/clawd-usage.service" << EOF
 [Unit]
 Description=Clawd Usage state daemon
 After=graphical-session.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/python3 main.py
+ExecStart=$PYTHON_BIN main.py
 WorkingDirectory=$PROJECT_DIR
 Restart=on-failure
 RestartSec=5

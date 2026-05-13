@@ -1,6 +1,6 @@
 # Clawd Usage
 
-![clawd_orange](/img/clawd_orange.png)
+![clawd_usage](/img/clawd_usage.png)
 
 KDE Plasma 6 widget showing Claude Code 5h rate limit usage. Claw'd mascot fills bottom-up; popup shows 5h/7d bars + reset countdown.
 
@@ -15,34 +15,28 @@ Requires Claude Code logged in (`~/.claude/.credentials.json` exists).
 ```sh
 git clone https://github.com/johnshields/clawd-usage ~/Projects/clawd-usage
 cd ~/Projects/clawd-usage
-kpackagetool6 --type Plasma/Applet --install plasmoid
+./install.sh
 ```
+
+`install.sh` ships the plasmoid via `kpackagetool6`, installs the icon to `~/.local/share/icons`, and sets up + starts the systemd user service.
 
 Add widget: right-click panel → **Add Widgets** → search **Clawd Usage**.
 
-## Daemon (systemd)
+## Diagnose
 
 ```sh
-mkdir -p ~/.config/systemd/user
-cat > ~/.config/systemd/user/clawd-usage.service << 'EOF'
-[Unit]
-Description=Clawd Usage state daemon
-After=graphical-session.target
-
-[Service]
-Type=simple
-ExecStart=/usr/bin/python3 main.py
-WorkingDirectory=%h/Projects/clawd-usage
-Restart=on-failure
-RestartSec=5
-
-[Install]
-WantedBy=graphical-session.target
-EOF
-
-systemctl --user daemon-reload
-systemctl --user enable --now clawd-usage.service
+./doctor.sh
 ```
+
+Reports daemon status, state freshness, plasmoid install, credentials, icon. Use first when something looks off.
+
+## Uninstall
+
+```sh
+./uninstall.sh
+```
+
+Removes systemd service, plasmoid, icon, state file.
 
 ## Update plasmoid after edits
 
@@ -54,8 +48,21 @@ kquitapp6 plasmashell && kstart plasmashell
 ## Layout
 
 ```
-main.py                       daemon entry (stdlib only)
-src/oauth.py                  OAuth refresh + usage API + state writer
-plasmoid/metadata.json        plasmoid manifest
-plasmoid/contents/ui/main.qml widget UI (Canvas asterisk + popup)
+install.sh / uninstall.sh / doctor.sh
+main.py                          daemon entry (stdlib only)
+src/oauth.py                     OAuth refresh + usage API + state writer
+src/constants.py                 paths, endpoints, tunables
+src/utils.py                     read/atomic-write JSON, request_json, backoff
+plasmoid/metadata.json           plasmoid manifest
+plasmoid/contents/ui/main.qml    widget UI (Canvas creature + popup)
+plasmoid/contents/ui/ClawdIcon.qml  reusable filling-creature component
+plasmoid/contents/config/        KConfig schema + config UI
+plasmoid/contents/icons/         silhouette + eyes + logo SVG
 ```
+
+## Requires
+
+- Linux + KDE Plasma 6
+- Python 3.10+
+- `kpackagetool6`, `systemctl` (standard with Plasma 6)
+- Claude Code authenticated (`~/.claude/.credentials.json`)

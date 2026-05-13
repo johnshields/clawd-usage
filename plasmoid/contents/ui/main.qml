@@ -43,7 +43,7 @@ PlasmoidItem {
         root.tick++;
         // Unique source string each call forces re-execution.
         stateReader.connectSource(
-            "sh -c 'cat /home/john/.claude/usage-bar-state.json # " + root.tick + "'"
+            "sh -c 'cat \"$HOME/.claude/usage-bar-state.json\" # " + root.tick + "'"
         );
     }
 
