@@ -2,7 +2,8 @@
 # Installs Clawd Usage plasmoid + daemon service.
 set -euo pipefail
 
-PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 # Preflight checks
 for cmd in python3 kpackagetool6 systemctl; do
@@ -19,7 +20,7 @@ PYTHON_BIN="$(command -v python3)"
 # Install icon to user hicolor theme
 ICON_DIR="$HOME/.local/share/icons/hicolor/scalable/apps"
 mkdir -p "$ICON_DIR"
-install -m644 "$PROJECT_DIR/plasmoid/contents/icons/clawd-logo.svg" "$ICON_DIR/clawd-logo.svg"
+install -m644 "$SCRIPT_DIR/plasmoid/contents/icons/clawd-logo.svg" "$ICON_DIR/clawd-logo.svg"
 
 # Refresh icon cache if tool available + theme index exists
 if command -v gtk-update-icon-cache >/dev/null 2>&1; then
@@ -28,8 +29,8 @@ if command -v gtk-update-icon-cache >/dev/null 2>&1; then
 fi
 
 # Install / upgrade plasmoid
-kpackagetool6 --type Plasma/Applet --install "$PROJECT_DIR/plasmoid" 2>/dev/null \
-    || kpackagetool6 --type Plasma/Applet --upgrade "$PROJECT_DIR/plasmoid"
+kpackagetool6 --type Plasma/Applet --install "$SCRIPT_DIR/plasmoid" 2>/dev/null \
+    || kpackagetool6 --type Plasma/Applet --upgrade "$SCRIPT_DIR/plasmoid"
 
 # Install systemd user service
 SYSTEMD_DIR="$HOME/.config/systemd/user"

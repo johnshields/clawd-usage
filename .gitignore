@@ -14,6 +14,10 @@ usage-bar.log
 usage-poller.log
 .credentials.json
 
+# macOS
+.DS_Store
+macos/.build/
+
 # Windows
 Thumbs.db
 Desktop.ini

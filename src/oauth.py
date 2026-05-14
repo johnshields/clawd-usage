@@ -7,7 +7,10 @@ from datetime import datetime, timezone
 from urllib.error import HTTPError, URLError
 
 from .constants import *  # noqa: F401, F403
-from .utils import atomic_write_json, exponential_backoff, read_json, request_json
+from .utils import (
+    atomic_write_json, exponential_backoff, read_json,
+    read_keychain_credentials, request_json, write_keychain_credentials,
+)
 
 log = logging.getLogger("clawd_usage")
 
@@ -22,19 +25,29 @@ class OAuthPoller:
         self._load_credentials()
 
     def _load_credentials(self) -> None:
-        oauth = (read_json(CREDENTIALS_FILE, default={}) or {}).get("claudeAiOauth", {})
+        if IS_MACOS:
+            store = read_keychain_credentials()
+        else:
+            store = read_json(CREDENTIALS_FILE, default={}) or {}
+        oauth = store.get("claudeAiOauth", {})
         self._refresh_token    = oauth.get("refreshToken")
         self._access_token     = oauth.get("accessToken")
         expires_ms             = oauth.get("expiresAt", 0)
         self._token_expires_at = expires_ms / 1000 if expires_ms else 0
 
     def _save_credentials(self) -> None:
-        existing = read_json(CREDENTIALS_FILE, default={}) or {}
+        if IS_MACOS:
+            existing = read_keychain_credentials()
+        else:
+            existing = read_json(CREDENTIALS_FILE, default={}) or {}
         oauth = existing.setdefault("claudeAiOauth", {})
         oauth["accessToken"]  = self._access_token
         oauth["refreshToken"] = self._refresh_token
         oauth["expiresAt"]    = int(self._token_expires_at * 1000)
-        atomic_write_json(CREDENTIALS_FILE, existing)
+        if IS_MACOS:
+            write_keychain_credentials(existing)
+        else:
+            atomic_write_json(CREDENTIALS_FILE, existing)
 
     def _refresh_access_token(self) -> bool:
         if not self._refresh_token:

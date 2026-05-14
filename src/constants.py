@@ -1,6 +1,10 @@
 """Project-wide constants."""
 
+import platform
 from pathlib import Path
+
+# Platform
+IS_MACOS = platform.system() == "Darwin"
 
 # Paths
 CREDENTIALS_FILE = Path.home() / ".claude" / ".credentials.json"
@@ -20,3 +24,9 @@ TOKEN_REFRESH_BUFFER_S = 300
 MAX_429_REFRESH_RETRIES = 2
 BACKOFF_BASE_S          = 60
 MAX_BACKOFF_S           = 600
+
+# HTTP
+HTTP_TIMEOUT_S = 15
+
+# macOS Keychain
+KEYCHAIN_SERVICE = "Claude Code-credentials"
