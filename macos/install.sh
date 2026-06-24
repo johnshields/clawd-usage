@@ -52,6 +52,7 @@ swiftc \
 # Copy icon resources from shared assets
 cp "$PROJECT_DIR/linux/plasmoid/contents/icons/clawd-silhouette.png" "$APP_BUNDLE/Contents/Resources/"
 cp "$PROJECT_DIR/linux/plasmoid/contents/icons/clawd-eyes.png" "$APP_BUNDLE/Contents/Resources/"
+cp "$SCRIPT_DIR/AppIcon.icns" "$APP_BUNDLE/Contents/Resources/"
 
 # Info.plist — LSUIElement hides from dock (menu bar only)
 cat > "$APP_BUNDLE/Contents/Info.plist" << 'EOF'
@@ -71,6 +72,8 @@ cat > "$APP_BUNDLE/Contents/Info.plist" << 'EOF'
     <string>APPL</string>
     <key>LSMinimumSystemVersion</key>
     <string>13.0</string>
+    <key>CFBundleIconFile</key>
+    <string>AppIcon</string>
     <key>LSUIElement</key>
     <true/>
 </dict>
