@@ -10,15 +10,15 @@ struct PopoverView: View {
 
             Image(nsImage: ClawdIcon.render(
                 pct: state.pct,
-                loadError: state.loadError,
+                loadError: state.hasError,
                 size: Layout.popoverIcon,
                 warningThreshold: AppSettings.warningThreshold
             ))
             .renderingMode(.original)
             .frame(width: Layout.popoverIcon.width, height: Layout.popoverIcon.height)
 
-            if state.loadError {
-                Text("Auth error — run:\nclaude logout && claude login")
+            if state.hasError {
+                Text("Please login.")
                     .foregroundColor(Theme.dangerSUI)
                     .font(.caption)
                     .multilineTextAlignment(.center)
@@ -39,7 +39,10 @@ struct PopoverView: View {
                 }
             }
 
-            Button(action: { state.loadData() }) {
+            Button(action: {
+                state.requestFreshPoll()
+                state.loadData()
+            }) {
                 Image(systemName: "arrow.clockwise")
                     .font(.system(size: 14, weight: .bold))
                     .foregroundColor(.black)

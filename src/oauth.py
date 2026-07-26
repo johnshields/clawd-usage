@@ -22,6 +22,7 @@ class OAuthPoller:
         self._token_expires_at = 0.0
         self._rate_limit_until = 0.0
         self._consecutive_429s = 0
+        self._auth_broken      = False
         self._load_credentials()
 
     def _load_credentials(self) -> None:
@@ -51,6 +52,8 @@ class OAuthPoller:
 
     def _refresh_access_token(self) -> bool:
         if not self._refresh_token:
+            log.warning("No refresh token in credentials — run: claude logout && claude login")
+            self._auth_broken = True
             return False
         body = json.dumps({
             "grant_type":    "refresh_token",
@@ -69,6 +72,7 @@ class OAuthPoller:
         self._save_credentials()
         self._consecutive_429s = 0
         self._rate_limit_until = 0
+        self._auth_broken      = False
         return True
 
     def _ensure_valid_token(self) -> bool:
@@ -115,8 +119,17 @@ class OAuthPoller:
         }
         atomic_write_json(STATE_FILE, state)
 
+    def write_auth_error(self) -> None:
+        state = {
+            "auth_error": True,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+        }
+        atomic_write_json(STATE_FILE, state)
+
     def poll_once(self) -> dict | None:
         usage = self.fetch_usage()
         if usage:
             self.write_state(usage)
+        elif self._auth_broken:
+            self.write_auth_error()
         return usage

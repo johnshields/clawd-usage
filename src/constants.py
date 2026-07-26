@@ -9,6 +9,7 @@ IS_MACOS = platform.system() == "Darwin"
 # Paths
 CREDENTIALS_FILE = Path.home() / ".claude" / ".credentials.json"
 STATE_FILE       = Path.home() / ".claude" / "usage-bar-state.json"
+PID_FILE         = Path.home() / ".claude" / "usage-bar-daemon.pid"
 
 # OAuth + API
 CLAUDE_CODE_CLIENT_ID = "9d1c250a-e61b-44d9-88ed-5944d1962f5e"

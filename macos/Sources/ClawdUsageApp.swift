@@ -49,9 +49,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func observeChanges() {
         state.$pct
-            .combineLatest(state.$loadError)
+            .combineLatest(state.$loadError, state.$authError)
             .receive(on: RunLoop.main)
-            .sink { [weak self] _, _ in self?.updateStatusItem() }
+            .sink { [weak self] _, _, _ in self?.updateStatusItem() }
             .store(in: &cancellables)
 
         NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)
@@ -66,11 +66,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         guard let button = statusItem.button else { return }
         button.image = ClawdIcon.render(
             pct: state.pct,
-            loadError: state.loadError,
+            loadError: state.hasError,
             size: Layout.menuBarIcon,
             warningThreshold: AppSettings.warningThreshold
         )
-        if AppSettings.showPercentLabel && !state.loadError {
+        if AppSettings.showPercentLabel && !state.hasError {
             button.title = " \(Int(state.pct.rounded()))%"
             button.font = .monospacedDigitSystemFont(ofSize: 11, weight: .bold)
         } else {

@@ -33,6 +33,7 @@ enum Layout {
 
 enum Paths {
     static let stateFile = NSHomeDirectory() + "/.claude/usage-bar-state.json"
+    static let daemonPidFile = NSHomeDirectory() + "/.claude/usage-bar-daemon.pid"
 }
 
 // MARK: - Settings
