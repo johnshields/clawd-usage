@@ -8,6 +8,7 @@ BUILD_DIR="$SCRIPT_DIR/.build"
 APP_NAME="Clawd Usage"
 APP_BUNDLE="$BUILD_DIR/$APP_NAME.app"
 INSTALL_DIR="$HOME/Applications"
+DAEMON_DIR="$HOME/Library/Application Support/ClawdUsage"
 DAEMON_LABEL="com.john.clawdusage.daemon"
 PLIST_DIR="$HOME/Library/LaunchAgents"
 PLIST="$PLIST_DIR/$DAEMON_LABEL.plist"
@@ -86,6 +87,13 @@ rm -rf "$INSTALL_DIR/$APP_NAME.app"
 cp -R "$APP_BUNDLE" "$INSTALL_DIR/"
 echo "App installed: $INSTALL_DIR/$APP_NAME.app"
 
+# Vendor the Python daemon so it survives the repo being moved or deleted
+rm -rf "$DAEMON_DIR"
+mkdir -p "$DAEMON_DIR"
+cp "$PROJECT_DIR/main.py" "$DAEMON_DIR/"
+cp -R "$PROJECT_DIR/src" "$DAEMON_DIR/"
+echo "Daemon vendored: $DAEMON_DIR"
+
 # Install launchd daemon for Python poller
 mkdir -p "$PLIST_DIR"
 launchctl bootout "gui/$(id -u)/$DAEMON_LABEL" 2>/dev/null || true
@@ -101,10 +109,10 @@ cat > "$PLIST" << EOF
     <key>ProgramArguments</key>
     <array>
         <string>$PYTHON_BIN</string>
-        <string>$PROJECT_DIR/main.py</string>
+        <string>$DAEMON_DIR/main.py</string>
     </array>
     <key>WorkingDirectory</key>
-    <string>$PROJECT_DIR</string>
+    <string>$DAEMON_DIR</string>
     <key>RunAtLoad</key>
     <true/>
     <key>KeepAlive</key>

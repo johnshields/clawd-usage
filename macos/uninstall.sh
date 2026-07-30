@@ -15,6 +15,9 @@ killall "ClawdUsage" 2>/dev/null || true
 # Remove app
 rm -rf "$HOME/Applications/$APP_NAME.app"
 
+# Remove vendored daemon
+rm -rf "$HOME/Library/Application Support/ClawdUsage"
+
 # Remove state file
 rm -f "$HOME/.claude/usage-bar-state.json"
 
