@@ -3,7 +3,7 @@
 Cross-platform desktop widget that shows Claude Code rate limit usage, built with Python and native UI per platform (SwiftUI on macOS, QML on KDE Plasma 6).
 A stdlib-only Python daemon refreshes the OAuth token, polls the Anthropic usage API, and writes a shared state file; each platform's native widget reads that file and renders Claw'd, whose silhouette fills bottom-up with usage.
 
-![clawd_usage](img/clawd-usage_linux.png) ![clawd_usage](img/clawd-usage_mac.png)
+![clawd_usage](.assets/clawd-usage_linux.png) ![clawd_usage](.assets/clawd-usage_mac.png)
 
 Requires Claude Code logged in (`claude auth login`).
 
